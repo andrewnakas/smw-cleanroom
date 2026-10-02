@@ -11,3 +11,6 @@ baserom*
 *.gb
 *.gbc
 *.gba
+*.sfc
+*.smc
+smw_assets.dat

@@ -32,8 +32,18 @@
 7. The "Nintendo Presents" logo and other white-on-transparent text survive through the kept silhouette (2-bit alpha fact). Say if you want those redrawn instead.
 8. No speech in this game: no practice pack, no TTS.
 
+## Publish
+- `bash games/smw/publish.sh` (taint gate, then pushes `main` and `gh-pages`). Pushed 3 times on 2026-10-03 night, all with taint 0.
+- GitHub's "pages build and deployment" run sat in *queued* for 20+ minutes (their runner queue; each new push cancels the queued run),
+  so the live URL returned 404 at the last check. Next loop: wait for one run to finish before pushing again, then run the live headless check.
+
+## Art done so far (own drawings, `games/smw/sprites.py`, `drawn.py`)
+- Fonts/HUD/message text; score pop-ups (100..8000, 1UP).
+- Mario: own cap, face and big head stamped on every pose whose kept silhouette matches (34 of 51 small, 16 of 37 big); the rest get a simpler eye + moustache.
+- Items/enemies: mushroom, flower, star, P switch, shells, round walker, bullet.
+
 ## Next
-- Hand-drawn sprites (our own pixel art) for Mario, Yoshi, common enemies and items: `games/smw/sprites.py`.
+- More own sprites: Yoshi, Koopa, berries, coins/blocks (animated tiles, GFX33), signs with text (YOSHI, EXIT, BOWSER, GHOST HOUSE), big sprite letters (MARIO START!, GAME OVER, TIME UP), title logo.
 - Title logo redraw; overworld details.
 - Sample quality pass (instruments are recognisable in pitch and rhythm, timbre is synthetic).
 

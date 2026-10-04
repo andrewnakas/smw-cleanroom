@@ -19,8 +19,8 @@ POOL = [n for n in list(range(0x89, 0x8E)) + [0x90] + list(range(0x98, 0xB7)) + 
 RED, YELLOW, GREEN, CYAN = (7, 2), (6, 3), (2, 2), (2, 3)
 WORDS = [  # text, first row, first column, colours per letter
     ('SUPER', 5, 10, [RED, YELLOW, GREEN, CYAN, RED]),
-    ('MARIO', 9, 5, [GREEN, RED, YELLOW, CYAN, RED]),
-    ('WORLD', 9, 16, [YELLOW, GREEN, CYAN, RED, YELLOW]),
+    ('MARIO', 9, 4, [GREEN, RED, YELLOW, CYAN, RED]),
+    ('WORLD', 9, 16, [YELLOW, GREEN, CYAN, RED, YELLOW]),      # M and W are 3 tiles wide
 ]
 ROWS = {0x50AA: 10, 0x50CA: 11, 0x50EA: 11, 0x510A: 10, 0x5123: 24, 0x5143: 25, 0x5163: 25, 0x5183: 25, 0x51A3: 24}
 
@@ -33,11 +33,11 @@ def letters():
         'P': R(8, (1, 2, 1, 14), (1, 5, 1, 2), (5, 6, 2, 7), (1, 5, 7, 8)),
         'E': R(8, (1, 2, 1, 14), (1, 6, 1, 2), (1, 5, 7, 8), (1, 6, 13, 14)),
         'R': R(8, (1, 2, 1, 14), (1, 5, 1, 2), (5, 6, 2, 7), (1, 5, 7, 8), (3, 4, 9, 10), (5, 6, 11, 14)),
-        'M': R(8, (1, 2, 1, 14), (5, 6, 1, 14), (1, 6, 1, 2), (3, 4, 3, 7)),
+        'M': R(12, (1, 2, 1, 14), (9, 10, 1, 14), (3, 4, 1, 5), (7, 8, 1, 5), (5, 6, 4, 8)),      # wide: 3 tiles
         'A': R(8, (1, 2, 2, 14), (5, 6, 2, 14), (2, 5, 1, 2), (1, 6, 8, 9)),
         'I': R(8, (3, 4, 1, 14), (2, 5, 1, 2), (2, 5, 13, 14)),
         'O': R(8, (1, 2, 2, 13), (5, 6, 2, 13), (2, 5, 1, 2), (2, 5, 13, 14)),
-        'W': R(8, (1, 2, 1, 14), (5, 6, 1, 14), (1, 6, 13, 14), (3, 4, 5, 12)),
+        'W': R(12, (1, 2, 1, 14), (9, 10, 1, 14), (3, 4, 10, 14), (7, 8, 10, 14), (5, 6, 7, 11)),
         'L': R(8, (1, 2, 1, 14), (1, 6, 13, 14)),
         'D': R(8, (1, 2, 1, 14), (1, 5, 1, 2), (1, 5, 13, 14), (5, 6, 2, 13)),
     }
@@ -50,17 +50,19 @@ def build():
     slots, cells, seen = {}, {}, {}
     pool = list(POOL)
     for text, row, col, cols in WORDS:
+        x = col
         for k, ch in enumerate(text):
             pal, face = cols[k]
-            big = sprites._outlined_letter(L[ch], face, 1).repeat(2, 0).repeat(2, 1)      # 32 x 16
+            big = sprites._outlined_letter(L[ch], face, 1).repeat(2, 0).repeat(2, 1)      # 32 high, 16 or 24 wide
             for ty in range(4):
-                for tx in range(2):
+                for tx in range(big.shape[1] // 8):
                     t = big[ty * 8:ty * 8 + 8, tx * 8:tx * 8 + 8]
                     key = t.tobytes()
                     if key not in seen:
                         seen[key] = pool.pop(0)
                         slots[seen[key]] = t
-                    cells[(row + ty, col + 2 * k + tx)] = (seen[key], pal)
+                    cells[(row + ty, x + tx)] = (seen[key], pal)
+            x += big.shape[1] // 8
     return slots, cells
 
 

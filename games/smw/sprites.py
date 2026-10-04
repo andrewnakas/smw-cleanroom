@@ -350,6 +350,69 @@ def sheet_00(img):
     img[y:y + 8, x:x + 16] = tiny('1UP', 5)
 
 
+# ---- big sprite letters (MARIO START !, GAME OVER, TIME UP !): our own 8x16 block face ---------------
+# The game builds each letter from a top and a bottom tile of sheet 0F (tiles 00-17), reusing tiles
+# flipped: O bottom = O top upside down, T bottom = I, S = one tile turned, M = 11 px wide and shared
+# with the E after it. P and R have no left outline (the letter before supplies it).
+def _rects(w, *rs):
+    m = np.zeros((16, w), bool)
+    for x0, x1, y0, y1 in rs:
+        m[y0:y1 + 1, x0:x1 + 1] = True
+    return m
+
+
+def _outlined_letter(m, fill=5, line=2):
+    p = np.pad(m, 1)
+    near = np.zeros_like(m)
+    for dy in (0, 1, 2):
+        for dx in (0, 1, 2):
+            near |= p[dy:dy + m.shape[0], dx:dx + m.shape[1]]
+    out = np.zeros(m.shape, np.uint8)
+    out[near] = line
+    out[m] = fill
+    return out
+
+
+def big_letters():
+    """-> {sheet tile index: (8, 8) index tile}"""
+    st = (1, 2), (5, 6)                                    # the two stems of a standard letter
+    L = {
+        'I': _rects(8, (3, 4, 1, 14)),
+        '!': _rects(8, (3, 4, 1, 9), (3, 4, 12, 14)),
+        'T': _rects(8, (1, 6, 1, 2), (3, 4, 3, 14)),
+        'O': _rects(8, (1, 2, 2, 13), (5, 6, 2, 13), (2, 5, 1, 2), (2, 5, 13, 14)),
+        'U': _rects(8, (1, 2, 1, 13), (5, 6, 1, 13), (2, 5, 13, 14)),
+        'V': _rects(8, (1, 2, 1, 10), (5, 6, 1, 10), (2, 3, 11, 12), (4, 5, 11, 12), (3, 4, 13, 14)),
+        'A': _rects(8, (1, 2, 2, 14), (5, 6, 2, 14), (2, 5, 1, 2), (1, 6, 8, 9)),
+        'G': _rects(8, (1, 2, 2, 13), (2, 6, 1, 2), (2, 5, 13, 14), (5, 6, 8, 13), (4, 6, 8, 9)),
+        'E': _rects(8, (1, 2, 1, 14), (1, 6, 1, 2), (1, 6, 7, 8), (1, 6, 13, 14)),
+        'L': _rects(8, (1, 2, 1, 14), (1, 6, 13, 14)),
+        'S': _rects(8, (2, 6, 1, 2), (1, 2, 2, 7), (2, 5, 7, 8), (5, 6, 8, 13), (1, 5, 13, 14)),
+        'P': _rects(8, (0, 1, 1, 14), (0, 5, 1, 2), (5, 6, 2, 7), (0, 5, 7, 8)),
+        'R': _rects(8, (0, 1, 1, 14), (0, 5, 1, 2), (5, 6, 2, 7), (0, 5, 7, 8), (3, 4, 9, 10), (5, 6, 11, 14)),
+    }
+    g = {k: _outlined_letter(v) for k, v in L.items()}
+    # M (11 wide) followed by a narrow E: one 24-wide strip
+    me = _rects(24, (1, 2, 1, 14), (8, 9, 1, 14), (3, 3, 1, 4), (7, 7, 1, 4), (4, 4, 3, 6), (6, 6, 3, 6), (5, 5, 5, 8),
+                (11, 12, 1, 14), (11, 16, 1, 2), (11, 16, 7, 8), (11, 16, 13, 14))
+    me = _outlined_letter(me)
+    stem = np.zeros((16, 8), np.uint8)
+    stem[:, 5:8] = me[:, 0:3]
+    top, bot = (lambda a: a[:8]), (lambda a: a[8:])
+    return {
+        0x00: top(g['I']), 0x01: top(g['P']), 0x02: top(g['G']), 0x03: top(g['O']), 0x04: top(me[:, 0:8]), 0x05: top(me[:, 8:16]),
+        0x06: bot(g['!']), 0x07: bot(g['P']), 0x08: bot(g['G']), 0x09: bot(g['A']), 0x0A: bot(me[:, 0:8]), 0x0B: top(stem),
+        0x0C: top(g['U']), 0x0D: top(g['E']), 0x0E: top(g['R']), 0x0F: top(g['T']), 0x10: top(g['L']),
+        0x12: bot(g['V']), 0x13: bot(g['E']), 0x14: bot(g['R']), 0x15: top(g['S']), 0x16: bot(g['L']), 0x17: top(me[:, 16:24]),
+    }
+
+
+def sheet_0F(img):
+    for t, tile in big_letters().items():
+        y, x = t // 16 * 8, t % 16 * 8
+        img[y:y + 8, x:x + 8] = tile
+
+
 def paint_units(i, img):
     n = 0
     for (s, u), rows in UNITS.items():
@@ -365,5 +428,7 @@ def apply(i, img, spec):
         print('player faces: small %d of %d hand-drawn, big %d of %d' % sheet_32(img))
     if i == 0x00:
         sheet_00(img)
+    if i == 0x0F:
+        sheet_0F(img)
     paint_units(i, img)
     return img

@@ -21,7 +21,21 @@ def mode(vals, default=0):
     return int(np.bincount(vals).argmax()) if len(vals) else default
 
 
-def gfx_spec(raw, bpp):
+def default_rgb(it, bpp):
+    """A typical palette for sprite sheets (only used to pick one index per cell)."""
+    def cols(v):
+        w = np.frombuffer(v, '<u2').astype(np.int32)
+        return np.stack([w & 31, w >> 5 & 31, w >> 10 & 31], -1).astype(float)
+    spr = cols(it['kGlobalPalettes_Objects'])[48:54]         # black, 3 shades, 2 skin tones
+    rgb = np.zeros((16, 3))
+    rgb[1] = 31
+    rgb[2:8] = spr
+    if bpp == 4:
+        rgb[6:16] = cols(it['kPlayerPalettes'])[:10]
+    return rgb
+
+
+def gfx_spec(raw, bpp, rgb=None):
     img = tiles.sheet(tiles.decode(raw, bpp))
     h, w = img.shape
     if h % 16:
@@ -37,10 +51,25 @@ def gfx_spec(raw, bpp):
             if not s.any():
                 units.append(None)
                 continue
-            grid = [mode(u[y:y + 4, x:x + 4].ravel()) for y in range(0, 16, 4) for x in range(0, 16, 4)]
             e = u[edge[uy:uy + 16, ux:ux + 16]]
-            units.append({'sil': np.packbits(s).tobytes().hex(), 'grid': ''.join('%x' % g for g in grid),
-                          'edge': mode(e) if len(e) else 0})
+            ec = mode(e) if len(e) >= 8 else 0      # an outline colour only for sprite-like shapes
+            grid = []
+            for y in range(0, 16, 4):
+                for x in range(0, 16, 4):
+                    c = u[y:y + 4, x:x + 4].ravel()
+                    if not ec or rgb is None:   # background tile: commonest index
+                        grid.append(mode(c))
+                        continue
+                    # sprite: the index nearest to the cell's mean colour (outline left out), so shades
+                    # of one colour are not outvoted by a highlight
+                    c2 = c[(c != ec) & (c > 0)]
+                    if not len(c2):
+                        grid.append(mode(c))
+                        continue
+                    have = np.unique(c2)
+                    m = rgb[c2].mean(0)
+                    grid.append(int(have[((rgb[have] - m) ** 2).sum(1).argmin()]))
+            units.append({'sil': np.packbits(s).tobytes().hex(), 'grid': ''.join('%x' % g for g in grid), 'edge': ec})
     return {'bpp': bpp, 'bytes': len(raw), 'units': units}
 
 
@@ -95,7 +124,7 @@ def main(path):
     kept = [(n, b'' if L.is_regenerated(n) else v) for n, v in items]
     A.write(os.path.join(SPEC, 'kept.dat'), kept)
     ss = sheets(it)
-    gfx = {'%02X' % i: gfx_spec(s, L.BPP[i]) for i, s in enumerate(ss)}
+    gfx = {'%02X' % i: gfx_spec(s, L.BPP[i], default_rgb(it, L.BPP[i]) if L.BPP[i] > 2 else None) for i, s in enumerate(ss)}
     json.dump(gfx, open(os.path.join(SPEC, 'gfx.json'), 'w'), separators=(',', ':'))
     pal = {}
     for n, v in items:

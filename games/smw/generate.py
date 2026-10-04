@@ -2,6 +2,7 @@
 drawing and synthesis code. Never reads the ROM or the dirty tree."""
 import sys, os, json, struct
 import numpy as np
+from scipy.ndimage import uniform_filter
 from games.smw import assetfile as A, layout as L
 from cleanroom.snes import lz2, tiles, brr
 from cleanroom.audio import descriptor
@@ -23,9 +24,16 @@ def auto_sheet(g):
         y, x = k // 8 * 16, k % 8 * 16
         sil = np.unpackbits(np.frombuffer(bytes.fromhex(u['sil']), np.uint8)).reshape(16, 16).astype(bool)
         grid = np.array([int(c, 16) for c in u['grid']], np.uint8).reshape(4, 4)
+        grid[sil.reshape(4, 4, 4, 4).sum((1, 3)) < 4] = 0     # a cell showing under 4 pixels carries no colour
         nz = grid[grid > 0]
         fill = int(np.bincount(nz).argmax()) if len(nz) else (u['edge'] or 1)
-        big = np.kron(np.where(grid == 0, fill, grid), np.ones((4, 4), np.uint8))
+        # each pixel takes the colour with the largest blurred vote of the cells around it:
+        # rounded region borders instead of 4 px blocks
+        best, big = np.zeros((16, 16)), np.full((16, 16), fill, np.uint8)
+        for k in np.unique(nz):
+            v = uniform_filter(np.kron((grid == k).astype(float), np.ones((4, 4))), 5, mode='nearest')
+            big[v > best] = k
+            best = np.maximum(best, v)
         img[y:y + 16, x:x + 16] = np.where(sil, big, 0)
         edgecol[y:y + 16, x:x + 16] = u['edge']
     sil = img > 0

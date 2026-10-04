@@ -29,8 +29,8 @@ def hud_char(img, t, c, body=3, edge=1):
 
 
 def box_char(img, t, c, body=3, bg=1):
-    """Glyph on a filled cell (message box style)."""
-    _tile(img, t)[:] = np.where(pixfont.cell(c, 8, 8, True, 1, 0), body, bg)
+    """Glyph on a filled cell (message box style): our thin face, one pixel lower than the HUD face."""
+    _tile(img, t)[:] = np.where(pixfont.cell(c, 8, 8, False, 1, 1), body, bg)
 
 
 def menu_char(img, t, c, body=2, bg=3):
@@ -95,7 +95,7 @@ def sheet_29(img):
 
 
 def sheet_2A(img):
-    for i, c in enumerate('ABCDEFGHIJKLMNOPQRSTUVWXYZ!.-,?'):
+    for i, c in enumerate('ABCDEFGHIJKLMNOPQRSTUVWXYZ!.-,? '):
         box_char(img, i, c)
     hud_char(img, 0x20, ',', 2)
     for i, c in enumerate('Z0123456789BC'):

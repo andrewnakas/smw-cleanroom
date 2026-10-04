@@ -13,6 +13,10 @@ git remote get-url origin >/dev/null 2>&1 || git remote add origin https://githu
 git push -q origin main
 P=$W/pages
 rm -rf $P && mkdir -p $P && cp -r $S/. $P/
-cd $P && git init -q -b gh-pages && git add -A && git commit -qm "Site build $(date +%F_%H%M)" \
-  && git push -q -f https://github.com/andrewnakas/smw-cleanroom.git gh-pages
+NAME=$(git config user.name); MAIL=$(git config user.email)
+cd $P
+git init -q -b gh-pages
+git add -A
+git -c user.name="$NAME" -c user.email="$MAIL" commit -qm "Site build $(date +%F_%H%M)"
+git push -q -f https://github.com/andrewnakas/smw-cleanroom.git gh-pages
 echo "published: $(ls $P | tr '\n' ' ')"

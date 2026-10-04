@@ -51,7 +51,8 @@ def gfx_spec(raw, bpp, rgb=None):
             if not s.any():
                 units.append(None)
                 continue
-            e = u[edge[uy:uy + 16, ux:ux + 16]]
+            ue = edge[uy:uy + 16, ux:ux + 16]
+            e = u[ue]
             ec = mode(e) if len(e) >= 8 else 0      # an outline colour only for sprite-like shapes
             grid = []
             for y in range(0, 16, 4):
@@ -60,9 +61,9 @@ def gfx_spec(raw, bpp, rgb=None):
                     if not ec or rgb is None:   # background tile: commonest index
                         grid.append(mode(c))
                         continue
-                    # sprite: the index nearest to the cell's mean colour (outline left out), so shades
-                    # of one colour are not outvoted by a highlight
-                    c2 = c[(c != ec) & (c > 0)]
+                    # sprite: the index nearest to the cell's mean colour (border pixels left out), so
+                    # shades of one colour are not outvoted by a highlight
+                    c2 = c[~ue[y:y + 4, x:x + 4].ravel() & (c > 0)]
                     if not len(c2):
                         grid.append(mode(c))
                         continue

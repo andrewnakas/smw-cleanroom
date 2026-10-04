@@ -611,6 +611,16 @@ def apply(i, img, spec):
         for k, t in enumerate((0x1C, 0x1D, 0x1E, 0x1F, 0x2C, 0x2D, 0x2E, 0x2F)):
             y, x = t // 16 * 8, t % 16 * 8
             img[y:y + 8, x:x + 8] = a[k // 4 * 8:k // 4 * 8 + 8, k % 4 * 8:k % 4 * 8 + 8]
+    if i == 0x1E:          # numbered plates on poles (map): plate rows 2-12 of a 16x16 unit, digit in the border colour
+        from cleanroom.gfx import pixfont
+        for d, t in zip('1234567', (0x00, 0x0E, 0x20, 0x24, 0x28, 0x3E, 0x44)):
+            y, x = t // 16 * 8, t % 16 * 8
+            a = img[y:y + 16, x:x + 16]
+            a[2:13, 0:16] = 1
+            a[3:12, 1:15] = 6
+            a[3:12, 14], a[11, 1:15] = 4, 4
+            g = pixfont.cell(d, 6, 7, True, 0, 0)
+            a[4:11, 5:11][g] = 1
     if i == 0x29:          # copyright sign: a ring with a c
         ring = ["..2222..", ".2....2.", "2..22..2", "2.2....2", "2.2....2", "2..22..2", ".2....2.", "..2222.."]
         img[0x76 // 16 * 8:0x76 // 16 * 8 + 8, 0x76 % 16 * 8:0x76 % 16 * 8 + 8] = [[int(c) if c != '.' else 0 for c in r] for r in ring]

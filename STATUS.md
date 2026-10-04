@@ -45,6 +45,7 @@
 - Animated tiles: ? block (4 frames), eye block, coin (4 frames), ON / OFF word blocks; dinosaur head (3 units).
 - House name sign (YOSHI) typeset on its 32x16 board; poster.png is now the clean title screen with a caption.
 - Turtle frames get an eye pupil; EXIT sign and the HUD coin icon redrawn; background tiles no longer bleed colour across 8x8 borders (the dot pattern on hills is gone).
+- Numbered plates 1-7 on the map (sheet 1E) typeset.
 - Test harness: `?fkeys= ?fdump= ?turbo=` count game frames, so scripted runs are repeatable (see docs/PLATFORM_SNES.md).
 
 ## Title screen (done)
@@ -54,7 +55,7 @@
 - The title demo (no key presses, `fdump=700,900,...,2900`) is the standard sprite check.
 
 ## Next
-- More own sprites: Koopa, dinosaur bodies, berries, ON/OFF block text, signs with text (BOWSER, GHOST HOUSE), sliding shell-less turtle, Mario's riding poses (dark), HUD on layer 3 is not yet matched by look_vram in levels, bonus-game letters, overworld details, sample timbre pass.
+- More own sprites: Koopa, dinosaur bodies, berries, ON/OFF block text, text in pictures still automatic: BOWSER sign, GHOST HOUSE, countdown 4321 (sheet 20), THANK YOU! bubble (22), HELP! (24), Japanese note under ON OFF (17), sliding shell-less turtle, Mario's riding poses (dark), HUD on layer 3 is not yet matched by look_vram in levels, bonus-game letters, overworld details, sample timbre pass.
 - Title logo redraw; overworld details.
 - Sample quality pass (instruments are recognisable in pitch and rhythm, timbre is synthetic).
 

@@ -598,6 +598,19 @@ def apply(i, img, spec):
             if sh == i:
                 y, x = t // 16 * 8, t % 16 * 8
                 img[y:y + 8, x:x + 8] = w[:, k * 8:k * 8 + 8]
+    if i == 0x28:          # HUD coin counter icon (tile 2E): small coin with a slot
+        ic = ["  1111  ", " 133331 ", "13313331", "13313331", "13313331", "13313331", " 133331 ", "  1111  "]
+        img[0x2E // 16 * 8:0x2E // 16 * 8 + 8, 0x2E % 16 * 8:0x2E % 16 * 8 + 8] = [[int(c) if c != ' ' else 0 for c in r] for r in ic]
+    if i == 0x0F:          # EXIT sign: 32x16 plate (tiles 1C-1F / 2C-2F)
+        from cleanroom.gfx import pixfont
+        a = np.full((16, 32), 7, np.uint8)
+        a[0, :], a[15, :], a[:, 0], a[:, 31] = 2, 2, 2, 2
+        ln = pixfont.line('EXIT', True)
+        a[5:12, 4:4 + ln.shape[1]][ln] = 2
+        a[4:11, 3:3 + ln.shape[1]][ln] = 1
+        for k, t in enumerate((0x1C, 0x1D, 0x1E, 0x1F, 0x2C, 0x2D, 0x2E, 0x2F)):
+            y, x = t // 16 * 8, t % 16 * 8
+            img[y:y + 8, x:x + 8] = a[k // 4 * 8:k // 4 * 8 + 8, k % 4 * 8:k % 4 * 8 + 8]
     if i == 0x29:          # copyright sign: a ring with a c
         ring = ["..2222..", ".2....2.", "2..22..2", "2.2....2", "2.2....2", "2..22..2", ".2....2.", "..2222.."]
         img[0x76 // 16 * 8:0x76 // 16 * 8 + 8, 0x76 % 16 * 8:0x76 % 16 * 8 + 8] = [[int(c) if c != '.' else 0 for c in r] for r in ring]

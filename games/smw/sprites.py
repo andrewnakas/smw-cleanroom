@@ -621,6 +621,18 @@ def apply(i, img, spec):
             a[3:12, 14], a[11, 1:15] = 4, 4
             g = pixfont.cell(d, 6, 7, True, 0, 0)
             a[4:11, 5:11][g] = 1
+    if i == 0x24:          # HELP! shout bubble: 32x16 (tiles 20-23 / 30-33), jagged plate, letters in colour 1
+        from cleanroom.gfx import pixfont
+        a = np.zeros((16, 32), np.uint8)
+        a[3:13, 1:31] = 3
+        for x in range(1, 31, 4):                      # teeth above and below
+            a[1:3, x + 1:x + 3] = 3
+            a[13:15, x + 1:x + 3] = 3
+        ln = pixfont.line('HELP!', False)
+        a[4:11, 2:2 + ln.shape[1]][ln] = 1
+        for k, t in enumerate((0x20, 0x21, 0x22, 0x23, 0x30, 0x31, 0x32, 0x33)):
+            y, x = t // 16 * 8, t % 16 * 8
+            img[y:y + 8, x:x + 8] = a[k // 4 * 8:k // 4 * 8 + 8, k % 4 * 8:k % 4 * 8 + 8]
     if i == 0x29:          # copyright sign: a ring with a c
         ring = ["..2222..", ".2....2.", "2..22..2", "2.2....2", "2.2....2", "2..22..2", ".2....2.", "..2222.."]
         img[0x76 // 16 * 8:0x76 // 16 * 8 + 8, 0x76 % 16 * 8:0x76 % 16 * 8 + 8] = [[int(c) if c != '.' else 0 for c in r] for r in ring]

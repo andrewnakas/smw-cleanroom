@@ -79,8 +79,9 @@ def loop_outline(loop):
     x = loop.astype(np.float64)
     n = len(x)
     spec = np.abs(np.fft.rfft(x)) / n * 2
-    f0, _ = descriptor._f0(np.tile(x, max(2, 4096 // n + 1))[:4096], L.RATE)
-    cyc = int(np.clip(round(f0 * n / L.RATE), 1, n // 4)) if f0 > 0 else int(spec[1:n // 4].argmax() + 1)
+    # the outline is the level of the first 32 spectral lines of the loop itself (cycles = 1): no pitch
+    # tracker involved, so no octave errors (checked with look_samples)
+    cyc = 1
     harm = []
     for k in range(1, 33):
         b = cyc * k

@@ -46,6 +46,7 @@
 - House name sign (YOSHI) typeset on its 32x16 board; poster.png is now the clean title screen with a caption.
 - Turtle frames get an eye pupil; EXIT sign and the HUD coin icon redrawn; background tiles no longer bleed colour across 8x8 borders (the dot pattern on hills is gone).
 - Numbered plates 1-7 on the map (sheet 1E) and the HELP! bubble (sheet 24) typeset.
+- Samples checked (`python -m games.smw.look_samples dirty.dat clean.dat`): all 20 have the retail length; whole-sample level within 0.7 dB, loop level within 0.5 dB except the long loop of sample 5 (1.6 dB loud); the first loop spectral lines of the two samples inspected match within a few dB. Loop outline is now the first 32 spectral lines of the loop itself (no pitch tracker). Timbre of the one-shot (non-looping) samples is still synthetic noise+tone from the descriptor.
 - Test harness: `?fkeys= ?fdump= ?turbo=` count game frames, so scripted runs are repeatable (see docs/PLATFORM_SNES.md).
 
 ## Title screen (done)

@@ -31,7 +31,14 @@ def auto_sheet(g):
         # rounded region borders instead of 4 px blocks
         best, big = np.zeros((16, 16)), np.full((16, 16), fill, np.uint8)
         for k in np.unique(nz):
-            v = uniform_filter(np.kron((grid == k).astype(float), np.ones((4, 4))), 5, mode='nearest')
+            m = np.kron((grid == k).astype(float), np.ones((4, 4)))
+            if sil.all():       # background tiles are independent 8x8 pictures: no colour bleeding between them
+                v = np.zeros((16, 16))
+                for qy in (0, 8):
+                    for qx in (0, 8):
+                        v[qy:qy + 8, qx:qx + 8] = uniform_filter(m[qy:qy + 8, qx:qx + 8], 5, mode='nearest')
+            else:
+                v = uniform_filter(m, 5, mode='nearest')
             big[v > best] = k
             best = np.maximum(best, v)
         img[y:y + 16, x:x + 16] = np.where(sil, big, 0)

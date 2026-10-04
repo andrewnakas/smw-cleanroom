@@ -531,6 +531,29 @@ def sheet_33(img):
         quad(img, row, 3, coin(w))
 
 
+def pupil(v, rows=(0, 9)):
+    """Two dark pixels in the middle of the largest white area of the upper part of a unit (an eye)."""
+    white = v == WHITE
+    white[:rows[0]] = False
+    white[rows[1]:] = False
+    lab, n = ndimage.label(white)
+    if not n:
+        return False
+    sizes = ndimage.sum(white, lab, range(1, n + 1))
+    k = int(np.argmax(sizes)) + 1
+    if sizes[k - 1] < 6:
+        return False
+    ys, xs = np.nonzero(lab == k)
+    cy, cx = int(round(ys.mean())), int(round(xs.mean()))
+    for y in (cy, cy + 1):
+        if 0 <= y < 16 and v[y, cx] == WHITE:
+            v[y, cx] = BLACK
+    return True
+
+
+TURTLE_UNITS = (3, 20, 21, 22, 24)       # sheet 01: walking turtle frames (head with a large white eye area)
+
+
 def paint_units(i, img):
     n = 0
     for (s, u), rows in UNITS.items():
@@ -548,6 +571,9 @@ def apply(i, img, spec):
         sheet_00(img)
     if i == 0x0F:
         sheet_0F(img)
+    if i == 0x01:
+        for u in TURTLE_UNITS:
+            pupil(unit_view(img, u))
     if i == 0x08:          # name sign by the house: flat white board, dark letters, short post (tiles 66-69 / 76-79)
         from cleanroom.gfx import pixfont
         a = np.zeros((16, 32), np.uint8)

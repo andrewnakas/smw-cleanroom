@@ -61,6 +61,12 @@
 - Sample quality pass (instruments are recognisable in pitch and rhythm, timbre is synthetic).
 
 ## For the morning
-- Play: https://andrewnakas.github.io/smw-cleanroom/ (keyboard: arrows, Z jump, X spin, A run, Enter start).
-- Look at Decisions 2, 6, 7.
-- Nothing needed from you: the ROM was found at `D:/n64work/smw/rom/`.
+- Play: https://andrewnakas.github.io/smw-cleanroom/ (keyboard: arrows, Z jump, X spin, A run, Enter start). Last live headless check
+  2026-10-04 06:15: title, file select, overworld, Yoshi's Island 1, music in the audio log, no errors; live `smw.data` = local clean build.
+- Not tested by a person: gamepad, the touch pad on a phone, the page inside the decompgames.com iframe, how the music actually sounds.
+- Catalogue: `decompgames.json` (one entry, `id` "super-mario-world") and `poster.png` are in the repo root; nothing was pushed to the website repo.
+- Please review Decisions 2 (16x16 colour-grid unit), 6 (taint rule for small tiles) and 7 (logo text kept through its silhouette).
+- Still automatic (blobs inside the kept silhouette): most enemies and bosses, dinosaur bodies, backgrounds; late-game text in pictures
+  (BOWSER sign, GHOST HOUSE, THANK YOU! bubble, 4321 countdown, Japanese note under ON/OFF, bonus-game letters).
+- Nothing needed from you: the ROM was found at `D:/n64work/smw/rom/`. No speech in this game, so no practice pack.
+- Restart the improvement loop with the same `/loop` prompt; the next batch is listed under "Next".

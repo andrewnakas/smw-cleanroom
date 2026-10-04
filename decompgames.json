@@ -45,11 +45,11 @@
  "embedUrl": "https://andrewnakas.github.io/smw-cleanroom/",
  "verification": {
   "status": "smoke-tested",
-  "date": "2026-10-03",
+  "date": "2026-10-04",
   "browsers": [
    "Headless Edge"
   ],
-  "scope": "Headless test booted the build, started a file, crossed the overworld and entered Yoshi's Island 1 with audio running. Taint scan reported 0 failing.",
+  "scope": "Headless Edge run on the live build: title, file select, overworld and Yoshi's Island 1 with audio running. Taint scan reported 0 failing. Gamepad, touch and iframe embedding not hand-tested.",
   "playthrough": false
  },
  "image": "/images/super-mario-world.png"

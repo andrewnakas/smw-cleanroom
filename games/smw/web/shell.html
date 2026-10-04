@@ -145,7 +145,7 @@ function sendKey(code, down) {
 
 // ---- dev hooks (headless tests) --------------------------------------------------------------------------
 function devHooks(t0) {
-  if (Q.has('dump')) {
+  if (Q.has('dump') || Q.has('fdump')) {
     var gc = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function (t, o) { o = o || {}; o.preserveDrawingBuffer = true; return gc.call(this, t, o); };
   }
@@ -187,6 +187,21 @@ function devHooks(t0) {
       setTimeout(dump, 300);
     }, s * 1000);
   });
+  // deterministic variants counted in game frames: ?fkeys=600:Enter:10,...  ?fdump=900,1500  ?turbo=8
+  if (Q.has('turbo')) Module.__turbo = +Q.get('turbo');
+  var fev = [];
+  (Q.get('fkeys') || '').split(',').filter(Boolean).forEach(function (e) {
+    var p = e.split(':'), f = +p[0], d = +(p[2] || 8);
+    fev.push([f, function () { sendKey(p[1], true); }], [f + d, function () { sendKey(p[1], false); }]);
+  });
+  (Q.get('fdump') || '').split(',').filter(Boolean).map(Number).forEach(function (f, k) {
+    fev.push([f, function () {
+      var url = Module.canvas.toDataURL('image/png');
+      for (var i = 0; i < url.length; i += 4000) console.log('PW64PNG:' + k + ':' + url.slice(i, i + 4000));
+      console.log('PW64PNG:' + k + ':END');
+    }]);
+  });
+  if (fev.length) Module.onGameFrame = function (n) { for (var i = 0; i < fev.length; i++) if (fev[i][0] === n) fev[i][1](); };
   (Q.get('keys') || '').split(',').filter(Boolean).forEach(function (e) {
     var p = e.split(':'), t = +p[0], code = p[1], d = +(p[2] || 0.15);
     setTimeout(function () { sendKey(code, true); }, t * 1000);
@@ -203,7 +218,7 @@ function start() {
   Module.canvas.focus();
 }
 document.getElementById('start').addEventListener('click', start, { once: true });
-if (Q.has('autostart') || Q.has('dump')) start();
+if (Q.has('autostart') || Q.has('dump') || Q.has('fdump')) start();
 </script>
 </body>
 </html>

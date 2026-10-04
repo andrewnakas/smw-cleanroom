@@ -24,6 +24,11 @@ bash games/smw/build_web.sh                 # port + patches + clean assets -> D
 python -m games.smw.taint <dirty.dat> <clean.dat> site/smw.wasm site/smw.js site/index.html
 python ports/wasm/serve.py D:/n64work/smw/site 8483
 python ports/wasm/headless_shot.py out --base http://localhost:8483/index.html --secs 20,40 --query "keys=8:Enter:0.2,..." --webgl
+# deterministic test: keys and screenshots counted in GAME FRAMES, 8 frames per browser frame (wall-clock ?keys= drifts with load)
+python ports/wasm/headless_shot.py out --base http://localhost:8483/index.html --secs 999 --wait 45 --webgl   --query "turbo=8&fdump=2790,3060&fkeys=600:Enter:10,720:Enter:10,840:Enter:10,1500:KeyZ:10,1800:KeyZ:10,2400:ArrowLeft:20,2700:KeyZ:10"
+#   SMW timeline: 600/720/840 Enter = title, file A, 1 player; 1500 dismiss message; ~2000 overworld; 2400 Left, 2700 B = enter Yoshi's Island 1 (in level at ~2790)
+python -m games.smw.look_letters <assets.dat>                # big sprite words assembled from the kept tables
+python -m games.smw.look_player <assets.dat> out.png         # every player pose in the player palette
 python -m games.smw.look_sheets <assets.dat> out_prefix      # contact sheets; look_zoom / look_ascii for detail
 bash games/smw/publish.sh                   # taint gate, then push main + gh-pages
 ```

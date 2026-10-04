@@ -41,9 +41,12 @@
 - Fonts/HUD/message text; score pop-ups (100..8000, 1UP).
 - Mario: own cap, face and big head stamped on every pose whose kept silhouette matches (34 of 51 small, 16 of 37 big); the rest get a simpler eye + moustache.
 - Items/enemies: mushroom, flower, star, P switch, shells, round walker, bullet.
+- Big sprite words MARIO START ! / LUIGI / GAME OVER / TIME UP ! in our own 8x16 block face (checked offline with `look_letters`).
+- Animated tiles: ? block (4 frames), eye block, coin (4 frames); dinosaur head (3 units).
+- Test harness: `?fkeys= ?fdump= ?turbo=` count game frames, so scripted runs are repeatable (see docs/PLATFORM_SNES.md).
 
 ## Next
-- More own sprites: Yoshi, Koopa, berries, coins/blocks (animated tiles, GFX33), signs with text (YOSHI, EXIT, BOWSER, GHOST HOUSE), big sprite letters (MARIO START!, GAME OVER, TIME UP), title logo.
+- More own sprites: Koopa, dinosaur bodies, berries, ON/OFF block text, signs with text (YOSHI, EXIT, BOWSER, GHOST HOUSE), title logo, bonus-game letters.
 - Title logo redraw; overworld details.
 - Sample quality pass (instruments are recognisable in pitch and rhythm, timbre is synthetic).
 

@@ -413,6 +413,110 @@ def sheet_0F(img):
         img[y:y + 8, x:x + 8] = tile
 
 
+# ---- dinosaur head (sheet 0x33): ours, facing left: tall eye, nostril, white cheek, back spines ------
+DINO_HEAD = [
+    ".........222....",
+    "........21112...",
+    "........211212..",
+    "........211212..",
+    "...22222.21112..",
+    ".22555552211122.",
+    "2555555555511272",
+    "2525555555511772",
+    "2555555555554772",
+    "2555555555554272",
+    "2455555555544772",
+    ".245555555544272",
+    "..24444111144772",
+    "...2221111114272",
+    "......211111422.",
+    ".......2222222..",
+]
+DINO_HEAD_UNITS = (16, 18, 22)
+
+
+def place(img, u, rows):
+    """Replace unit u with our drawing, its bottom-right corner on the corner of the kept silhouette's box."""
+    v = unit_view(img, u)
+    art = np.array([[int(c, 16) if c != '.' else 0 for c in r] for r in rows], np.uint8)
+    ys, xs = np.nonzero(v)
+    ay, ax = np.nonzero(art)
+    dy, dx = (ys.max() - ay.max(), xs.max() - ax.max()) if len(ys) else (0, 0)
+    out = np.zeros_like(art)
+    h, w = art.shape
+    src = art[max(0, -dy):h - max(0, dy), max(0, -dx):w - max(0, dx)]
+    out[max(0, dy):max(0, dy) + src.shape[0], max(0, dx):max(0, dx) + src.shape[1]] = src
+    v[:] = out
+
+
+# ---- animated tiles (sheet 0x33): a frame is 4 consecutive 8x8 tiles (TL, TR, BL, BR) -----------------
+def quad(img, tile_row, q, art):
+    y, x = tile_row * 8, q * 32
+    a = np.asarray(art, np.uint8)
+    img[y:y + 8, x:x + 8], img[y:y + 8, x + 8:x + 16] = a[:8, :8], a[:8, 8:]
+    img[y:y + 8, x + 16:x + 24], img[y:y + 8, x + 24:x + 32] = a[8:, :8], a[8:, 8:]
+
+
+def block(body, top, low, line=2):
+    """Square block: `top` on the upper/left rim, `low` on the lower/right rim, cut corners."""
+    a = np.full((16, 16), body, np.uint8)
+    a[1, :], a[:, 1] = top, top
+    a[14, :], a[:, 14] = low, low
+    a[0, :], a[15, :], a[:, 0], a[:, 15] = line, line, line, line
+    for y, x in ((0, 0), (0, 15), (15, 0), (15, 15)):
+        a[y, x] = 0
+    return a
+
+
+_QMARK = ["11111", "11.11", "11.11", "...11", "..11.", ".11..", ".11..", ".....", ".11..", ".11.."]
+
+
+def question_block(k):
+    a = block(6, 5, 3)
+    for y, r in enumerate(_QMARK):
+        for x, c in enumerate(r):
+            if c == '1':
+                a[3 + y, 6 + x] = 2
+                a[2 + y, 5 + x] = 1        # white mark over its own shadow
+    a[2, 2 + 3 * k] = 1                    # a glint that walks along the top
+    return a
+
+
+def eye_block():
+    a = block(6, 7, 5)
+    for x in (4, 10):
+        a[4:7, x:x + 2] = 1
+        a[5:7, x + 1] = 2
+    return a
+
+
+def coin(width):
+    a = np.zeros((16, 16), np.uint8)
+    for y in range(16):
+        t = abs(y - 7.5) / 7.5
+        half = max(1.0, width / 2 * (1 - t ** 3) ** 0.5) if width > 4 else width / 2
+        x0, x1 = int(round(8 - half)), int(round(8 + half)) - 1
+        a[y, x0:x1 + 1] = 7
+        a[y, x0], a[y, x1] = 2, 2
+        if x1 - x0 >= 4:
+            a[y, x0 + 1], a[y, x1 - 1] = 1, 5
+    a[0, a[0] > 0] = 2
+    a[15, a[15] > 0] = 2
+    if width >= 8:
+        a[4:12, 7:9] = 6
+    return a
+
+
+def sheet_33(img):
+    for u in DINO_HEAD_UNITS:
+        place(img, u, DINO_HEAD)
+    for k, row in enumerate((12, 13, 14, 15)):
+        quad(img, row, 0, question_block(k))
+    quad(img, 12, 2, eye_block())
+    for row, w in ((12, 12), (13, 8), (14, 4), (15, 8)):
+        quad(img, row, 3, coin(w))
+
+
 def paint_units(i, img):
     n = 0
     for (s, u), rows in UNITS.items():
@@ -430,5 +534,7 @@ def apply(i, img, spec):
         sheet_00(img)
     if i == 0x0F:
         sheet_0F(img)
+    if i == 0x33:
+        sheet_33(img)
     paint_units(i, img)
     return img

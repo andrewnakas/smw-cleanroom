@@ -13,6 +13,9 @@ void OpenGLRenderer_Create(struct RendererFuncs *funcs) { (void)funcs; }
 // Wait for the next 60.1 Hz game frame on the browser's animation clock.
 EM_ASYNC_JS(void, web_frame_wait, (void), {
   var P = 1000 / 60.0988, w = Module.__fw || (Module.__fw = { next: performance.now(), run: 0 });
+  w.n = (w.n || 0) + 1;
+  if (Module.onGameFrame) Module.onGameFrame(w.n);      // dev hooks: keys and dumps by frame number
+  if (Module.__turbo && w.n % Module.__turbo) return;   // dev: run several frames per browser frame
   w.next += P;
   var now = performance.now();
   if (now - w.next > 120) w.next = now;

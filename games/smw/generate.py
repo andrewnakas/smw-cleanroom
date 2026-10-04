@@ -138,6 +138,11 @@ def main(out):
             v = gfx[0x32]
         elif n == 'kGfx33':
             v = gfx[0x33]
+        elif n == 'kLoadStripeImagePtrs':          # our own title logo arrangement
+            from games.smw import title
+            arr = A.unpack_array(v)
+            arr[title.STRIPE] = title.patch_stripe(arr[title.STRIPE])
+            v = A.pack_array(arr)
         elif n == 'kSpcSamples':
             v = smp
         elif L.is_palette(n):

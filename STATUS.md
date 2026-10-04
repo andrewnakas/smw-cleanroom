@@ -1,7 +1,6 @@
 # Super Mario World clean room: status
 
-**State (2026-10-03 night):** boots and plays in the browser with audio; taint 0; published to
-`andrewnakas/smw-cleanroom` + GitHub Pages (see "Publish" below for the last result).
+**State (2026-10-04 01:15):** live at https://andrewnakas.github.io/smw-cleanroom/ ; boots and plays with audio; taint 0.
 
 ## What works
 - **Web route 1**: snesrev/smw C port compiled with Emscripten + SDL2 (`games/smw/build_web.sh`), running from a
@@ -33,9 +32,10 @@
 8. No speech in this game: no practice pack, no TTS.
 
 ## Publish
-- `bash games/smw/publish.sh` (taint gate, then pushes `main` and `gh-pages`). Pushed 3 times on 2026-10-03 night, all with taint 0.
-- GitHub's "pages build and deployment" run sat in *queued* for 20+ minutes (their runner queue; each new push cancels the queued run),
-  so the live URL returned 404 at the last check. Next loop: wait for one run to finish before pushing again, then run the live headless check.
+- `bash games/smw/publish.sh` (taint gate, then pushes `main` and `gh-pages`).
+- **Live and checked**: https://andrewnakas.github.io/smw-cleanroom/ (headless run on the live URL: title, file select, overworld,
+  Yoshi's Island 1, audio log shows music). The first Pages deployment waited ~50 min in GitHub's queue; do not push `gh-pages`
+  again while a run is queued (each push cancels it).
 
 ## Art done so far (own drawings, `games/smw/sprites.py`, `drawn.py`)
 - Fonts/HUD/message text; score pop-ups (100..8000, 1UP).
@@ -45,17 +45,14 @@
 - Animated tiles: ? block (4 frames), eye block, coin (4 frames), ON / OFF word blocks; dinosaur head (3 units).
 - Test harness: `?fkeys= ?fdump= ?turbo=` count game frames, so scripted runs are repeatable (see docs/PLATFORM_SNES.md).
 
-## Title logo plan (next)
-- `games/smw/look_vram.py` + the page hook `?fvram=<frame>` snapshot the PPU of the clean build and map every on-screen background
-  cell to the sheet tile shown there. Finding: the title logo, the frame border and the copyright line are 2bpp **layer 3** tiles
-  (sheets 28/29/2A/2B), each cell with its own palette, and the retail logo reuses tiles between letters.
-- So a free redraw cannot go through the retail tile arrangement. Plan: rewrite the logo part of the title-screen stripe image
-  (our own tile arrangement and palettes over the same screen area, using the logo's own tile slots), then typeset SUPER MARIO WORLD
-  in our block face. Same tool will serve the signs (YOSHI, EXIT, BOWSER, GHOST HOUSE) and the "Nintendo" copyright word.
-- The title demo (no key presses, `fdump=700,900,...,2900`) is the standard sprite check: Mario on the dinosaur, Koopas, Pokey all appear.
+## Title screen (done)
+- `games/smw/title.py`: the logo part of the title stripe image is our own arrangement (SUPER / MARIO WORLD in our block face,
+  55 tiles in the tile slots the logo owned, one palette per letter); copyright sign and maker name re-typeset.
+- Tools behind it: `?fvram=<frame>` PPU snapshot + `games/smw/look_vram.py` (screen cell -> sheet tile). Reusable for signs.
+- The title demo (no key presses, `fdump=700,900,...,2900`) is the standard sprite check.
 
 ## Next
-- More own sprites: Koopa, dinosaur bodies, berries, ON/OFF block text, signs with text (YOSHI, EXIT, BOWSER, GHOST HOUSE), title logo, bonus-game letters.
+- More own sprites: Koopa, dinosaur bodies, berries, ON/OFF block text, signs with text (YOSHI, EXIT, BOWSER, GHOST HOUSE), bonus-game letters, overworld details, sample timbre pass.
 - Title logo redraw; overworld details.
 - Sample quality pass (instruments are recognisable in pitch and rhythm, timbre is synthetic).
 

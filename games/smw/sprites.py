@@ -322,7 +322,7 @@ UNITS.update({
 
 # 3x5 digits and letters for the score pop-ups (ours)
 _D = {'0': "111 1.1 1.1 1.1 111", '1': ".1. 11. .1. .1. 111", '2': "111 ..1 111 1.. 111", '4': "1.1 1.1 111 ..1 ..1",
-      '8': "111 1.1 111 1.1 111", 'O': "111 1.1 1.1 1.1 111", 'N': "1.1 111 111 111 1.1", 'F': "111 1.. 11. 1.. 1..", 'U': "1.1 1.1 1.1 1.1 111", 'P': "111 1.1 111 1.. 1..", ' ': "... ... ... ... ..."}
+      '8': "111 1.1 111 1.1 111", 'O': "111 1.1 1.1 1.1 111", 'N': "1.1 111 111 111 1.1", 'F': "111 1.. 11. 1.. 1..", 'I': "111 .1. .1. .1. 111", 'T': "111 .1. .1. .1. .1.", 'E': "111 1.. 11. 1.. 111", 'D': "11. 1.1 1.1 1.1 11.", 'U': "1.1 1.1 1.1 1.1 111", 'P': "111 1.1 111 1.. 1..", ' ': "... ... ... ... ..."}
 
 
 def tiny(text, body, shadow=2, w=16):
@@ -548,6 +548,22 @@ def apply(i, img, spec):
         sheet_00(img)
     if i == 0x0F:
         sheet_0F(img)
+    if i == 0x29:
+        from games.smw import title
+        print('title logo: %d tiles of %d slots' % (title.paint_sheet_29(img), len(title.POOL)))
+    if i in (0x28, 0x2B):  # the maker's name in the copyright line: 7 tiles in a row on screen (2 in 0x28, 5 in 0x2B)
+        from cleanroom.gfx import pixfont
+        ln = pixfont.line('Nintendo', False)
+        w = np.zeros((8, 56), np.uint8)
+        w[1:8, 5:5 + ln.shape[1]][ln] = 1
+        w[0:7, 4:4 + ln.shape[1]][ln] = 2
+        for k, (sh, t) in enumerate(((0x28, 0x46), (0x28, 0x47), (0x2B, 0x2E), (0x2B, 0x2F), (0x2B, 0x45), (0x2B, 0x46), (0x2B, 0x3F))):
+            if sh == i:
+                y, x = t // 16 * 8, t % 16 * 8
+                img[y:y + 8, x:x + 8] = w[:, k * 8:k * 8 + 8]
+    if i == 0x29:          # copyright sign: a ring with a c
+        ring = ["..2222..", ".2....2.", "2..22..2", "2.2....2", "2.2....2", "2..22..2", ".2....2.", "..2222.."]
+        img[0x76 // 16 * 8:0x76 // 16 * 8 + 8, 0x76 % 16 * 8:0x76 % 16 * 8 + 8] = [[int(c) if c != '.' else 0 for c in r] for r in ring]
     if i == 0x33:
         sheet_33(img)
     paint_units(i, img)

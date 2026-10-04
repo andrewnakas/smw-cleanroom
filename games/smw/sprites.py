@@ -541,7 +541,7 @@ def pupil(v, rows=(0, 9)):
         return False
     sizes = ndimage.sum(white, lab, range(1, n + 1))
     k = int(np.argmax(sizes)) + 1
-    if sizes[k - 1] < 6:
+    if sizes[k - 1] < 4:
         return False
     ys, xs = np.nonzero(lab == k)
     cy, cx = int(round(ys.mean())), int(round(xs.mean()))
@@ -574,6 +574,8 @@ def apply(i, img, spec):
     if i == 0x01:
         for u in TURTLE_UNITS:
             pupil(unit_view(img, u))
+        for u in (1, 2):                # small shell-less ones: eye lower in the unit
+            pupil(unit_view(img, u), (4, 12))
     if i == 0x08:          # name sign by the house: flat white board, dark letters, short post (tiles 66-69 / 76-79)
         from cleanroom.gfx import pixfont
         a = np.zeros((16, 32), np.uint8)

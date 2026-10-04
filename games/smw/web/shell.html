@@ -201,6 +201,15 @@ function devHooks(t0) {
       console.log('PW64PNG:' + k + ':END');
     }]);
   });
+  (Q.get('fvram') || '').split(',').filter(Boolean).map(Number).forEach(function (f, k) {   // PPU snapshot for look_vram
+    fev.push([f, function () {
+      var p = Module._web_ppu_dump(), n = 32 + 0x10000 + 0x200 + 0x220, b = '', h = Module.HEAPU8;
+      for (var i = 0; i < n; i++) b += String.fromCharCode(h[p + i]);
+      b = btoa(b);
+      for (var j = 0; j < b.length; j += 4000) console.log('VRAM:' + k + ':' + b.slice(j, j + 4000));
+      console.log('VRAM:' + k + ':END');
+    }]);
+  });
   if (fev.length) Module.onGameFrame = function (n) { for (var i = 0; i < fev.length; i++) if (fev[i][0] === n) fev[i][1](); };
   (Q.get('keys') || '').split(',').filter(Boolean).forEach(function (e) {
     var p = e.split(':'), t = +p[0], code = p[1], d = +(p[2] || 0.15);

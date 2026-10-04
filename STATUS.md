@@ -42,8 +42,17 @@
 - Mario: own cap, face and big head stamped on every pose whose kept silhouette matches (34 of 51 small, 16 of 37 big); the rest get a simpler eye + moustache.
 - Items/enemies: mushroom, flower, star, P switch, shells, round walker, bullet.
 - Big sprite words MARIO START ! / LUIGI / GAME OVER / TIME UP ! in our own 8x16 block face (checked offline with `look_letters`).
-- Animated tiles: ? block (4 frames), eye block, coin (4 frames); dinosaur head (3 units).
+- Animated tiles: ? block (4 frames), eye block, coin (4 frames), ON / OFF word blocks; dinosaur head (3 units).
 - Test harness: `?fkeys= ?fdump= ?turbo=` count game frames, so scripted runs are repeatable (see docs/PLATFORM_SNES.md).
+
+## Title logo plan (next)
+- `games/smw/look_vram.py` + the page hook `?fvram=<frame>` snapshot the PPU of the clean build and map every on-screen background
+  cell to the sheet tile shown there. Finding: the title logo, the frame border and the copyright line are 2bpp **layer 3** tiles
+  (sheets 28/29/2A/2B), each cell with its own palette, and the retail logo reuses tiles between letters.
+- So a free redraw cannot go through the retail tile arrangement. Plan: rewrite the logo part of the title-screen stripe image
+  (our own tile arrangement and palettes over the same screen area, using the logo's own tile slots), then typeset SUPER MARIO WORLD
+  in our block face. Same tool will serve the signs (YOSHI, EXIT, BOWSER, GHOST HOUSE) and the "Nintendo" copyright word.
+- The title demo (no key presses, `fdump=700,900,...,2900`) is the standard sprite check: Mario on the dinosaur, Koopas, Pokey all appear.
 
 ## Next
 - More own sprites: Koopa, dinosaur bodies, berries, ON/OFF block text, signs with text (YOSHI, EXIT, BOWSER, GHOST HOUSE), title logo, bonus-game letters.

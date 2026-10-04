@@ -30,7 +30,7 @@ for s in $SRCS; do
 done > $B/todo.txt
 cat $B/todo.txt | xargs -P 2 -L 1 sh -c 'emcc -c '"$CF"' $0 -o $1 2>&1 | grep -E "error" ; true'
 emcc $OBJS -O2 -sUSE_SDL=2 -sASYNCIFY -sASYNCIFY_IGNORE_INDIRECT=1 -sASYNCIFY_STACK_SIZE=65536 -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=67108864 \
-  -sSTACK_SIZE=1048576 -sENVIRONMENT=web -lidbfs.js -sEXPORTED_RUNTIME_METHODS=FS --profiling-funcs \
+  -sSTACK_SIZE=1048576 -sENVIRONMENT=web -lidbfs.js -sEXPORTED_RUNTIME_METHODS=FS,HEAPU8 -sEXPORTED_FUNCTIONS=_main,_web_ppu_dump --profiling-funcs \
   --preload-file $B/fs@/ -o $SITE/smw.js 2>&1 | grep -v "^cache:" | head -20
 python $REPO/games/smw/web/make_page.py $SITE
 ls -la $SITE | awk '{print $5, $9}' | tail -n +2 | tr '\n' ' '; echo

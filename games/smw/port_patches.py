@@ -6,6 +6,7 @@ import sys, os
 
 WEB_C = r'''// Web glue for the Emscripten build (our own code).
 #include <emscripten.h>
+#include <string.h>
 #include "types.h"
 struct RendererFuncs;
 void OpenGLRenderer_Create(struct RendererFuncs *funcs) { (void)funcs; }
@@ -23,6 +24,25 @@ EM_ASYNC_JS(void, web_frame_wait, (void), {
   w.run = 0;
   do { await new Promise(function (r) { requestAnimationFrame(r); }); } while (performance.now() < w.next - 2);
 });
+
+// Dev: snapshot of the PPU (registers, VRAM, CGRAM, OAM) for the offline scene tools.
+#include "src/snes/ppu.h"
+extern Ppu *g_my_ppu;
+static uint8 g_web_ppu_dump[32 + 0x10000 + 0x200 + 0x220];
+EMSCRIPTEN_KEEPALIVE uint8 *web_ppu_dump(void) {
+  Ppu *p = g_my_ppu;
+  uint8 *o = g_web_ppu_dump;
+  o[0] = p->bgmode; o[1] = p->obsel;
+  memcpy(o + 2, p->bgXsc, 4);
+  memcpy(o + 6, &p->bgTileAdr, 2);
+  memcpy(o + 8, p->hScroll, 8);
+  memcpy(o + 16, p->vScroll, 8);
+  memcpy(o + 24, p->screenEnabled, 2);
+  memcpy(o + 32, p->vram, 0x10000);
+  memcpy(o + 32 + 0x10000, p->cgram, 0x200);
+  memcpy(o + 32 + 0x10200, p->oam, 0x220);
+  return o;
+}
 
 // Persist saves/ (battery save + save states) to IndexedDB.
 EM_JS(void, web_sync_saves, (void), {

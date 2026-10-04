@@ -322,7 +322,7 @@ UNITS.update({
 
 # 3x5 digits and letters for the score pop-ups (ours)
 _D = {'0': "111 1.1 1.1 1.1 111", '1': ".1. 11. .1. .1. 111", '2': "111 ..1 111 1.. 111", '4': "1.1 1.1 111 ..1 ..1",
-      '8': "111 1.1 111 1.1 111", 'U': "1.1 1.1 1.1 1.1 111", 'P': "111 1.1 111 1.. 1..", ' ': "... ... ... ... ..."}
+      '8': "111 1.1 111 1.1 111", 'O': "111 1.1 1.1 1.1 111", 'N': "1.1 111 111 111 1.1", 'F': "111 1.. 11. 1.. 1..", 'U': "1.1 1.1 1.1 1.1 111", 'P': "111 1.1 111 1.. 1..", ' ': "... ... ... ... ..."}
 
 
 def tiny(text, body, shadow=2, w=16):
@@ -507,7 +507,21 @@ def coin(width):
     return a
 
 
+def word_block(text, body, top, low):
+    """Block with a short word in our 3x5 letters, doubled in height."""
+    a = block(body, top, low)
+    x = (16 - (4 * len(text) - 1)) // 2
+    for ch in text:
+        g = np.array([[c == '1' for c in r] for r in _D[ch].split()]).repeat(2, 0)
+        a[4:14, x + 1:x + 4][g] = 2
+        a[3:13, x:x + 3][g] = 1
+        x += 4
+    return a
+
+
 def sheet_33(img):
+    quad(img, 10, 0, word_block('ON', 4, 5, 3))
+    quad(img, 11, 0, word_block('OFF', 6, 7, 5))
     for u in DINO_HEAD_UNITS:
         place(img, u, DINO_HEAD)
     for k, row in enumerate((12, 13, 14, 15)):
